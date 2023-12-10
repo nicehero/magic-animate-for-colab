@@ -1,7 +1,7 @@
 pretrained_model_path: "/content/majicmixRealistic_v7.safetensors"
 pretrained_vae_path: ""
 pretrained_controlnet_path: "/content/MagicAnimate/densepose_controlnet"
-openpose_path: "pretrained_models/control_v11p_sd15_openpose"
+openpose_path: "/content/control_v11p_sd15_openpose"
 pretrained_appearance_encoder_path: "/content/MagicAnimate/appearance_encoder"
 pretrained_unet_path: ""
 
