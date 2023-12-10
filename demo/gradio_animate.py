@@ -26,6 +26,7 @@ def animate(
     steps,
     guidance_scale,
     controlnet_model,
+    prompt,
 ):
     return animator(
         reference_image,
@@ -34,6 +35,7 @@ def animate(
         steps,
         guidance_scale,
         controlnet_model,
+        prompt
     )
 
 
@@ -69,6 +71,9 @@ with gr.Blocks() as demo:
             guidance_scale = gr.Textbox(
                 label="Guidance scale", value=7.5, info="default: 7.5"
             )
+            prompt = gr.Textbox(
+                label="prompt", value=""
+            )
             submit = gr.Button("Animate")
 
     def read_video(video):
@@ -76,8 +81,8 @@ with gr.Blocks() as demo:
         fps = reader.get_meta_data()["fps"]
         return video
 
-    def read_image(image, size=512):
-        return np.array(Image.fromarray(image).resize((size, size)))
+    def read_image(image):
+        return np.array(Image.fromarray(image))
 
     # when user uploads a new video
     motion_sequence.upload(read_video, motion_sequence, motion_sequence)
@@ -100,6 +105,7 @@ with gr.Blocks() as demo:
                 label="Controlnet Model",
                 value="densepose",
             ),
+            prompt
         ],
         animation,
     )

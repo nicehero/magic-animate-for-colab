@@ -1,4 +1,10 @@
 <!-- # magic-edit.github.io -->
+## 🦒 Colab
+
+| Colab | Info
+| --- | --- |
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nicehero/magic-animate-for-colab/blob/main/magic_animate_colab.ipynb) | magic_animate_colab
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/camenduru/MagicAnimate-colab/blob/main/DensePose_colab.ipynb) | dense_pose_colab (Thanks to [DensePose](https://github.com/facebookresearch/detectron2/tree/main/projects/DensePose) ❤)
 
 <p align="center">
 

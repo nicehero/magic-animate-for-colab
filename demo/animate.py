@@ -43,6 +43,9 @@ from safetensors import safe_open
 import math
 from pathlib import Path
 
+def convert_to_nearest_multiple_of_64(num):
+    return ((num + 31) // 64) * 64
+
 class MagicAnimate:
     def __init__(self, config="configs/prompts/animation.yaml",controlnet_model="densepose") -> None:
         print("Initializing MagicAnimate Pipeline...")
@@ -189,7 +192,7 @@ class MagicAnimate:
         instance.__init__(*args, **kwargs)
     
     def __call__(
-        self, source_image, motion_sequence, random_seed, step, guidance_scale, controlnet_model="densepose", size=512,
+        self, source_image, motion_sequence, random_seed, step, guidance_scale, controlnet_model="densepose", size=512,prompt=""
     ):
         if self.controlnet_model != controlnet_model:
             self.vae.to("cpu")
@@ -199,7 +202,7 @@ class MagicAnimate:
             self.appearance_encoder.to("cpu")
             torch_gc()
             self.reset_init(config="configs/prompts/animation.yaml", controlnet_model=controlnet_model)
-        prompt = n_prompt = ""
+        n_prompt = ""
         random_seed = int(random_seed)
         step = int(step)
         guidance_scale = float(guidance_scale)
@@ -210,17 +213,27 @@ class MagicAnimate:
             set_seed(random_seed)
         else:
             torch.seed()
-
+        H0=size
+        W0=size
+        fps = 25
         if motion_sequence.endswith(".mp4"):
-            control = VideoReader(motion_sequence).read()
-            if control[0].shape[0] != size:
-                control = [
-                    np.array(Image.fromarray(c).resize((size, size))) for c in control
-                ]
+            vr = VideoReader(motion_sequence)
+            fps = vr.fps
+            control = vr.read()
+            H0,W0,C0 = control[0].shape
+            if W0 < H0:
+                W0 = 512
+                H0 = convert_to_nearest_multiple_of_64(int((H0 / W0) * 512))
+            else:
+                H0 = 512
+                W0 = convert_to_nearest_multiple_of_64(int((W0 / H0) * 512))
+            control = [
+                np.array(Image.fromarray(c).resize((W0, H0))) for c in control
+            ]
             control = np.array(control)
 
-        if source_image.shape[0] != size:
-            source_image = np.array(Image.fromarray(source_image).resize((size, size)))
+        source_image = np.array(Image.fromarray(source_image).resize((W0, H0)))
+        print(f'size:{W0}x{H0}')
         H, W, C = source_image.shape
 
         init_latents = None
@@ -270,7 +283,7 @@ class MagicAnimate:
         animation_path = f"{savedir}/{time_str}.mp4"
 
         os.makedirs(savedir, exist_ok=True)
-        save_videos_grid(samples_per_video, animation_path)
+        save_videos_grid(samples_per_video, animation_path, fps=fps)
 
         return animation_path
 
