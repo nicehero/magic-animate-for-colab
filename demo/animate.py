@@ -47,10 +47,8 @@ def convert_to_nearest_multiple_of_64(num):
     return ((num + 31) // 64) * 64
 
 class MagicAnimate:
-    def __init__(self, config="configs/prompts/animation.yaml",controlnet_model="densepose") -> None:
-        print("Initializing MagicAnimate Pipeline...")
-        *_, func_args = inspect.getargvalues(inspect.currentframe())
-        func_args = dict(func_args)
+    def __init__(self, config="configs/prompts/animation.yaml",controlnet_model="") -> None:
+        print("Initializing MagicAnimate Pipeline ....")
 
         self.config = config
         
@@ -131,7 +129,11 @@ class MagicAnimate:
         self.unet.enable_xformers_memory_efficient_attention()
         self.appearance_encoder.enable_xformers_memory_efficient_attention()
         self.controlnet.enable_xformers_memory_efficient_attention()
-
+        self.make_pipline(inference_config,motion_module)
+        print("Initialization Done!")
+        self.L = config.L
+    def make_pipline(self,inference_config,motion_module):
+        print("make_pipline start!")
         self.pipeline = AnimationPipeline(
             vae=self.vae,
             text_encoder=self.text_encoder,
@@ -147,6 +149,8 @@ class MagicAnimate:
         # 1. unet ckpt
         # 1.1 motion module
         motion_module_state_dict = torch.load(motion_module, map_location="cpu")
+        *_, func_args = inspect.getargvalues(inspect.currentframe())
+        func_args = dict(func_args)
         if "global_step" in motion_module_state_dict:
             func_args.update({"global_step": motion_module_state_dict["global_step"]})
         motion_module_state_dict = (
@@ -184,9 +188,8 @@ class MagicAnimate:
         del motion_module_state_dict
 
         self.pipeline.to("cuda")
-        self.L = config.L
+        print("make_pipline done!")
 
-        print("Initialization Done!")
 
     def reset_init(instance, *args, **kwargs):
         instance.__init__(*args, **kwargs)
@@ -195,13 +198,24 @@ class MagicAnimate:
         self, source_image, motion_sequence, random_seed, step, guidance_scale, controlnet_model="densepose", size=512,prompt=""
     ):
         if self.controlnet_model != controlnet_model:
-            self.vae.to("cpu")
-            self.unet.to("cpu")
-            self.text_encoder.to("cpu")
-            self.controlnet.to("cpu")
-            self.appearance_encoder.to("cpu")
+            print("xxx1",controlnet_model)
+            del self.pipeline
+            del self.controlnet
             torch_gc()
-            self.reset_init(config="configs/prompts/animation.yaml", controlnet_model=controlnet_model)
+            print("xxx2")
+            self.controlnet_model = controlnet_model
+            config = OmegaConf.load(self.config)
+            if "openpose" in self.controlnet_model:
+                self.controlnet = ControlNetModel.from_pretrained(config.openpose_path)
+                print("Using OpenPose ControlNet")
+            else:
+                self.controlnet = ControlNetModel.from_pretrained(config.pretrained_controlnet_path)
+                print("Using Densepose ControlNet")
+            inference_config = OmegaConf.load(config.inference_config)
+            motion_module = config.motion_module
+            self.make_pipline(inference_config,motion_module)
+            torch_gc()
+            print("xxx3")
         n_prompt = ""
         random_seed = int(random_seed)
         step = int(step)
