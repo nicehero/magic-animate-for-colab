@@ -47,7 +47,7 @@ def convert_to_nearest_multiple_of_64(num):
     return ((num + 31) // 64) * 64
 
 class MagicAnimate:
-    def __init__(self, config="configs/prompts/animation.yaml",controlnet_model="") -> None:
+    def __init__(self, config="configs/prompts/animation.yaml",controlnet_model="densepose") -> None:
         print("Initializing MagicAnimate Pipeline ....")
 
         self.config = config
@@ -207,7 +207,7 @@ class MagicAnimate:
             else:
                 self.controlnet = ControlNetModel.from_pretrained(config.pretrained_controlnet_path)
                 print("Using Densepose ControlNet")
-            self.pipeline.register_modules(controlnet=controlnet,)
+            self.pipeline.register_modules(controlnet=self.controlnet,)
             self.pipeline.to("cuda")
             torch_gc()
             print("xxx3")
