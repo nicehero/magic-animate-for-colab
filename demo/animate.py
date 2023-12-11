@@ -296,7 +296,7 @@ class MagicAnimate:
 
         os.makedirs(savedir, exist_ok=True)
         save_videos_grid(samples_per_video, animation_path, fps=fps)
-
+        torch_gc()
         return animation_path
 
     
