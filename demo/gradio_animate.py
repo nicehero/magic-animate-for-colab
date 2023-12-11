@@ -35,7 +35,7 @@ def animate(
         steps,
         guidance_scale,
         controlnet_model,
-        prompt
+        prompt=prompt
     )
 
 

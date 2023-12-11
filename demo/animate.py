@@ -212,6 +212,7 @@ class MagicAnimate:
             torch_gc()
             print("xxx3")
         n_prompt = ""
+        print(f'prompt:{prompt}')
         random_seed = int(random_seed)
         step = int(step)
         guidance_scale = float(guidance_scale)
