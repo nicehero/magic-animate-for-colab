@@ -198,11 +198,7 @@ class MagicAnimate:
         self, source_image, motion_sequence, random_seed, step, guidance_scale, controlnet_model="densepose", size=512,prompt=""
     ):
         if self.controlnet_model != controlnet_model:
-            print("xxx1",controlnet_model)
-            del self.pipeline
-            del self.controlnet
-            torch_gc()
-            print("xxx2")
+            print("change controlnet:",controlnet_model)
             self.controlnet_model = controlnet_model
             config = OmegaConf.load(self.config)
             if "openpose" in self.controlnet_model:
@@ -211,9 +207,8 @@ class MagicAnimate:
             else:
                 self.controlnet = ControlNetModel.from_pretrained(config.pretrained_controlnet_path)
                 print("Using Densepose ControlNet")
-            inference_config = OmegaConf.load(config.inference_config)
-            motion_module = config.motion_module
-            self.make_pipline(inference_config,motion_module)
+            self.pipeline.register_modules(controlnet=controlnet,)
+            self.pipeline.to("cuda")
             torch_gc()
             print("xxx3")
         n_prompt = ""
