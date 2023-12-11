@@ -1,4 +1,10 @@
 <!-- # magic-edit.github.io -->
+## New Feature  
+#### Support for rectangular videos of non-512x512 dimensions, with automatic adaptation to the appropriate resolution
+#### Support for automatic adaptation of the output video's frame rate
+#### Support for additional input prompt to guide video output
+#### Support for utilizing OpenPose to guide video output
+
 ## 🦒 Colab
 
 | Colab | Info
