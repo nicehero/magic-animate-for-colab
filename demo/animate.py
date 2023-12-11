@@ -207,8 +207,7 @@ class MagicAnimate:
             else:
                 self.controlnet = ControlNetModel.from_pretrained(config.pretrained_controlnet_path)
                 print("Using Densepose ControlNet")
-                    self.controlnet.to(torch.float16)
-            self.appearance_encoder.to(torch.float16)
+            self.controlnet.to(torch.float16)
             self.controlnet.enable_xformers_memory_efficient_attention()
             self.pipeline.register_modules(controlnet=self.controlnet,)
             self.pipeline.to("cuda")
